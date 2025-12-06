@@ -28,27 +28,30 @@ export const api = {
         return response.json();
     },
 
-    get(url: string) {
-        return this.request(url);
+    get(url: string, signal?: AbortSignal) {
+        return this.request(url, { signal });
     },
 
-    post(url: string, data: any) {
+    post(url: string, data: any, signal?: AbortSignal) {
         return this.request(url, {
             method: 'POST',
             body: JSON.stringify(data),
+            signal,
         });
     },
 
-    put(url: string, data: any) {
+    put(url: string, data: any, signal?: AbortSignal) {
         return this.request(url, {
             method: 'PUT',
             body: JSON.stringify(data),
+            signal,
         });
     },
 
-    delete(url: string) {
+    delete(url: string, signal?: AbortSignal) {
         return this.request(url, {
             method: 'DELETE',
+            signal,
         });
     },
 };

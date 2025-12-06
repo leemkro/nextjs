@@ -18,10 +18,15 @@ export default function Home() {
   const user = getCurrentUser();
 
   useEffect(() => {
-    loadPosts();
+    const abortController = new AbortController();
+    loadPosts(abortController.signal);
+
+    return () => {
+      abortController.abort();
+    };
   }, [currentPage, search]);
 
-  const loadPosts = async () => {
+  const loadPosts = async (signal: AbortSignal) => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -30,11 +35,13 @@ export default function Home() {
       });
       if (search) params.append('search', search);
 
-      const data = await api.get(`/posts?${params}`);
+      const data = await api.get(`/posts?${params}`, signal);
       setPosts(data.posts);
       setTotalPages(data.totalPages);
     } catch (err) {
-      console.error('Failed to load posts:', err);
+      if (err instanceof Error && err.name !== 'AbortError') {
+        console.error('Failed to load posts:', err);
+      }
     } finally {
       setLoading(false);
     }

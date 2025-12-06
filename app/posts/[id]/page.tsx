@@ -18,19 +18,26 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    loadPostAndComments();
-  }, []);
+    const abortController = new AbortController();
+    loadPostAndComments(abortController.signal);
 
-  const loadPostAndComments = async () => {
+    return () => {
+      abortController.abort();
+    };
+  }, [id]);
+
+  const loadPostAndComments = async (signal: AbortSignal) => {
     try {
       const [postData, commentsData] = await Promise.all([
-        api.get(`/posts/${id}`),
-        api.get(`/posts/${id}/comments`)
+        api.get(`/posts/${id}`, signal),
+        api.get(`/posts/${id}/comments`, signal)
       ]);
       setPost(postData);
       setComments(commentsData);
     } catch (err) {
-      console.error('Failed to load post:', err);
+      if (err instanceof Error && err.name !== 'AbortError') {
+        console.error('Failed to load post:', err);
+      }
     } finally {
       setLoading(false);
     }

@@ -27,8 +27,9 @@ export default function NewPostPage() {
     try {
       const post = await api.post('/posts', { title, content });
       router.push(`/posts/${post.id}`);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('게시글 작성에 실패했습니다');
+      setError(error.message);
       setLoading(false);
     }
   };

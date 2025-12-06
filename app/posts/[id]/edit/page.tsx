@@ -19,12 +19,17 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    loadPost();
-  }, []);
+    const abortController = new AbortController();
+    loadPost(abortController.signal);
 
-  const loadPost = async () => {
+    return () => {
+      abortController.abort();
+    };
+  }, [id, user, router]);
+
+  const loadPost = async (signal: AbortSignal) => {
     try {
-      const data = await api.get(`/posts/${id}`);
+      const data = await api.get(`/posts/${id}`, signal);
       setPost(data);
       setTitle(data.title);
       setContent(data.content);
@@ -33,7 +38,9 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
         router.push(`/posts/${id}`);
       }
     } catch (err) {
-      setError('게시글을 불러올 수 없습니다');
+      if (err instanceof Error && err.name !== 'AbortError') {
+        setError('게시글을 불러올 수 없습니다');
+      }
     } finally {
       setLoading(false);
     }
@@ -47,8 +54,9 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
     try {
       await api.put(`/posts/${id}`, { title, content });
       router.push(`/posts/${id}`);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('게시글 수정에 실패했습니다');
+      setError(error.message);
       setSaving(false);
     }
   };

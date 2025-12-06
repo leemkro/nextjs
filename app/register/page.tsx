@@ -6,6 +6,7 @@ import { api } from '@/lib/api';
 import { setToken, setCurrentUser } from '@/lib/authStore';
 import Link from 'next/link';
 
+
 export default function RegisterPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -24,8 +25,9 @@ export default function RegisterPage() {
       setToken(data.token);
       setCurrentUser(data.user);
       router.push('/');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('회원가입에 실패했습니다');
+      setError(error.message);
     } finally {
       setLoading(false);
     }
