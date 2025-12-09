@@ -23,9 +23,8 @@ export default function LoginPage() {
       setToken(data.token);
       setCurrentUser(data.user);
       router.push('/');
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('로그인에 실패했습니다');
-      setError(error.message);
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
